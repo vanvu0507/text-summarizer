@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Text Summarizer</h1>
+        <form id="summarizeForm">
+            <textarea id="text" name="text" placeholder="Enter text to summarize..."></textarea>
+            <input type="file" id="fileInput" name="file" accept=".txt,.pdf,.docx,.doc" onchange="handleFileSelect()">
+            <button type="submit">Summarize</button>
+            <textarea id="summary" name="summary" placeholder="Summary will appear here..." readonly></textarea>
+            <label for="numSentences">Number of Sentences:</label>
+            <input type="number" id="numSentences" name="numSentences" min="1" max="10" value="3">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('summarizeForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            summarize();
+        });
+
+        function summarize() {
+            var form = document.getElementById('summarizeForm');
+            var formData = new FormData(form);
+            
+            fetch('/summarize', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('summary').value = data.summary;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function handleFileSelect() {
+            var file = document.getElementById('fileInput').files[0];
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var text = event.target.result;
+                document.getElementById('text').value = text;
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
